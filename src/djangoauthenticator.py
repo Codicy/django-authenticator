@@ -6,7 +6,6 @@ from jupyterhub.auth import Authenticator
 from jupyterhub.auth import LocalAuthenticator
 from jupyterhub.utils import url_path_join
 from MySQLdb import connect
-from sqlalchemy.sql.functions import user
 from tornado import gen, httputil, web
 from traitlets import Unicode
 from traitlets.config import application
