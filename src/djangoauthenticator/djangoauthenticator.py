@@ -1,11 +1,12 @@
 import base64
 import json
+import logging
 
 from jupyterhub.handlers import BaseHandler
 from jupyterhub.auth import Authenticator
 from jupyterhub.auth import LocalAuthenticator
 from jupyterhub.utils import url_path_join
-from MySQLdb import connect
+from MySQLdb import connect, Error
 from tornado import gen, httputil, web
 from traitlets import Unicode
 from traitlets.config import application
@@ -37,17 +38,25 @@ class DjangoSessionLoginHandler(BaseHandler):
 
     def get_db_connection(self):
         if (self.db_connection is None):
-            self.db_connection = connect(user=self.authenticator.mysql_username,
-                password=self.authenticator.mysql_password,
-                host=self.authenticator.mysql_hostname)
+            try:
+                self.db_connection = connect(user=self.authenticator.mysql_username,
+                    password=self.authenticator.mysql_password,
+                    host=self.authenticator.mysql_hostname)
+            except Error as err:
+                logging.error(err)
         return self.db_connection
     
     def get_session_data(self, session_key):
         db_connection = self.get_db_connection()
-        db_cursor = db_connection.cursor()
-        db_cursor.execute("SELECT session_data from {0}.django_session WHERE session_key=%s AND expire_date > now();".format(self.authenticator.mysql_db), (session_key))
-        result = db_cursor.fetchone()
-        return result[0] if result else None
+        try:
+            db_cursor = db_connection.cursor()
+            db_cursor.execute("SELECT session_data from {0}.django_session WHERE session_key=%s AND expire_date > now();".format(self.authenticator.mysql_db), (session_key))
+            result = db_cursor.fetchone()
+        except Error as err:
+            logging.error(err)
+        if result and len(result) == 0:
+            logging.info("Session with id='{0}' not found".format(session_key))
+        return next(iter(result or []), None)
 
     def user_id_from_session(self, session_data):
         decoded_session_data = json.loads(base64.b64decode(session_data)[41:])
@@ -55,10 +64,15 @@ class DjangoSessionLoginHandler(BaseHandler):
     
     def retrieve_user(self, user_id):
         db_connection = self.get_db_connection()
-        db_cursor = db_connection.cursor()
-        db_cursor.execute("SELECT username from {0}.users WHERE id=%s;".format(self.authenticator.mysql_db), (user_id))
-        result = db_cursor.fetchone()
-        return result[0] if result else None
+        try:
+            db_cursor = db_connection.cursor()
+            db_cursor.execute("SELECT username from {0}.users WHERE id=%s;".format(self.authenticator.mysql_db), (user_id))
+            result = db_cursor.fetchone()
+        except Error as err:
+            logging.error(err)
+        if result and len(result) == 0:
+            logging.info("User with id={0} not found".format(user_id))
+        return next(iter(result or []), None)
     
     def retrieve_username(self, session_key):
         session_data = self.get_session_data(session_key)
