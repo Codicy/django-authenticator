@@ -1,6 +1,6 @@
 # JupyterHub django-session-authenticator - A Django Session Authenticator for JupyterHub
 
-Authenticate to Jupyterhub using an active Django login session, which was created by a Django-based service running on a server in the same domain as the JupyterHub service.
+Authenticate to JupyterHub using an active Django login session, which was created by a Django-based service running on a server in the same domain as the JupyterHub service.
 
 ## Prerequisites
 
@@ -49,6 +49,7 @@ There are a number of configuration settings, which need to be made. The name of
 ```
 # Django session cookie name
 c.DjangoSessionAuthenticator.django_session_cookie_name = '<insert-session-cookie-name-here>'
+```
 
 ## Issues
 
