@@ -16,13 +16,13 @@ To allow this JupyterHub (and this authenticator) to "see" the session cookie ge
 This package can be installed with pip:
 
 ```
-pip install jupyterhub-django-session-authenticator
+pip install django-authenticator-gdaley
 ```
 
-Alternately, you can clone this repository and run:
+Alternately, you can clone the source repository and run:
 
 ```
-cd jupyterhub-django-session-authenticator
+cd django-authenticator
 pip install -e .
 ```
 
