@@ -11,6 +11,8 @@ To allow this JupyterHub (and this authenticator) to "see" the session cookie ge
 * Django and JupyterHub must be hosted under the same domain. For example, django.hostname.com and jupyterhub.hostname.com
 * Django's SESSION_COOKIE_DOMAIN must be set to allow cross-domain cookies. For example, hostname.com
 
+*Note that only MySQL database-backed sessions are supported at present.*
+
 ## Installation
 
 This package can be installed with pip:
@@ -30,25 +32,31 @@ pip install -e .
 
 You should edit your file `jupyterhub_config.py` to set the authenticator class. The DjangoSessionLocalAuthenticator provides features such as local user creation. If you already have local users then you may use the DjangoSessionAuthenticator authenticator class, as follows:
 
-##### For authentication and local user creation
+### For authentication and local user creation
 ```
 c.JupyterHub.authenticator_class = 'djangoauthenticator.djangoauthenticator.DjangoSessionLocalAuthenticator'
 ```
 
 This class is derived from LocalAuthenticator and therefore provides features such as the ability to add local accounts through the admin interface if configured to do so.
 
-##### For authentication of the Django session only
+### For authentication of the Django session only
 
 ```
 c.JupyterHub.authenticator_class = 'djangoauthenticator.djangoauthenticator.DjangoSessionAuthenticator'
 ```
 
-##### Required configuration
+### Required configuration
 
 There are a number of configuration settings, which need to be made. The name of the session cookie used by Django is optional. If you are using the default session cookie name ("sessionid"), there is no need to set it here.
 ```
 # Django session cookie name
 c.DjangoSessionAuthenticator.django_session_cookie_name = '<insert-session-cookie-name-here>'
+# Django MySQL database hostname
+c.DjangoSessionAuthenticator.mysql_hostname = '<insert-db-hostname-here>'
+# Django MySQL username
+c.DjangoSessionAuthenticator.mysql_username = '<insert-db-username-here>'
+# Django MySQL password
+c.DjangoSessionAuthenticator.mysql_password = '<insert-db-password-here>'
 ```
 
 ## Issues
