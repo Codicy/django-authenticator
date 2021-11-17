@@ -43,7 +43,8 @@ class DjangoSessionLoginHandler(BaseHandler):
                     password=self.authenticator.mysql_password,
                     host=self.authenticator.mysql_hostname)
             except Error as err:
-                logging.error(err)
+                self.log.error(err)
+            self.log.info("Connected to DB {0} on host {1}".format(self.authenticator.mysql_db, self.authenticator.mysql_hostname))
         return self.db_connection
     
     def get_session_data(self, session_key):
@@ -53,9 +54,9 @@ class DjangoSessionLoginHandler(BaseHandler):
             db_cursor.execute("SELECT session_data from {0}.django_session WHERE session_key=%s AND expire_date > now();".format(self.authenticator.mysql_db), (session_key))
             result = db_cursor.fetchone()
         except Error as err:
-            logging.error(err)
+            self.log.error(err)
         if result and len(result) == 0:
-            logging.info("Session with id='{0}' not found".format(session_key))
+            self.log.info("Session with id='{0}' not found".format(session_key))
         return next(iter(result or []), None)
 
     def user_id_from_session(self, session_data):
@@ -69,9 +70,9 @@ class DjangoSessionLoginHandler(BaseHandler):
             db_cursor.execute("SELECT username from {0}.users WHERE id=%s;".format(self.authenticator.mysql_db), (user_id))
             result = db_cursor.fetchone()
         except Error as err:
-            logging.error(err)
+            self.log.error(err)
         if result and len(result) == 0:
-            logging.info("User with id={0} not found".format(user_id))
+            self.log.info("User with id={0} not found".format(user_id))
         return next(iter(result or []), None)
     
     def retrieve_username(self, session_key):
